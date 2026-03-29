@@ -1,9 +1,0 @@
-{
-    "singleQuote": false,
-    "trailingComma": "all",
-    "tabWidth": 4,
-    "useTabs": true,
-    "editor.formatOnSave": true,
-    "bracketSpacing": true,
-    "jsxBracketSameLine": false
-}
