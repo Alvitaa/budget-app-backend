@@ -8,11 +8,12 @@ import {
     ParseUUIDPipe,
     Post,
     Put,
+    Query,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import type { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { UserResponseDto } from "./DTOs/UserResponse.dto";
+import { UserResponseDTO } from "./DTOs/UserResponse.dto";
 
 @Controller("users")
 export class UserController {
@@ -21,31 +22,27 @@ export class UserController {
     @Get(":id")
     async getUserById(
         @Param("id", new ParseUUIDPipe()) id: string,
-    ): Promise<UserResponseDto | null> {
+    ): Promise<UserResponseDTO | null> {
         return this.userService.user({ id });
     }
 
     @Get()
-    async getAllUsers(): Promise<UserResponseDto[]> {
+    async getAllUsers(): Promise<UserResponseDTO[]> {
         return this.userService.users({});
     }
 
     @Post()
     async createUser(
         @Body() data: { name: string; email: string; password: string },
-    ): Promise<UserResponseDto> {
-        const hashedPassword = await bcrypt.hash(data.password, 12);
-        return this.userService.createUser({
-            ...data,
-            password: hashedPassword,
-        });
+    ): Promise<UserResponseDTO> {
+        return this.userService.createUser(data);
     }
 
     @Put(":id")
     async updateUser(
         @Param("id", new ParseUUIDPipe()) id: string,
         @Body() data: User,
-    ): Promise<UserResponseDto> {
+    ): Promise<UserResponseDTO> {
         return this.userService.updateUser({
             where: { id },
             data: data,
@@ -53,7 +50,7 @@ export class UserController {
     }
 
     @Delete(":id")
-	@HttpCode(204)
+    @HttpCode(204)
     async deleteUserById(
         @Param("id", new ParseUUIDPipe()) id: string,
     ): Promise<void> {
