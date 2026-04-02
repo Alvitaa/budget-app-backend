@@ -1,8 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
 import { CategoryService } from "./category.service";
 import { CategoryDTO } from "./DTOs/category.dto";
-import { TransactionType } from "@prisma/client";
 import { UpdateCategoryDTO } from "./DTOs/updateCategory.dto";
 import { GetCategoryDTO } from "./DTOs/getCategory.dto";
 
@@ -12,7 +11,7 @@ export class CategoryController {
     constructor(private categoryService: CategoryService) {}
 
     @Post()
-    createCategory(@Req() req, @Body() body: CategoryDTO) {
+    async createCategory(@Req() req, @Body() body: CategoryDTO) {
         return this.categoryService.createCategory(req.user.id, body);
     }
 
@@ -39,8 +38,9 @@ export class CategoryController {
     }
 
     @Delete(":id")
+    @HttpCode(204)
     async deleteCategory(@Req() req, @Param("id") categoryId: string) {
         const userId = req.user.id;
-        return this.categoryService.deleteCategory(userId, categoryId);
+        await this.categoryService.deleteCategory(userId, categoryId);
     }
 }
