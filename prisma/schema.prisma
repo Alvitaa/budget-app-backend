@@ -26,12 +26,14 @@ model Category {
     id   String @id @default(uuid())
     name String
 
+    type TransactionType
+
     userId String
     user   User   @relation(fields: [userId], references: [id])
 
     transactions Transaction[]
 
-    @@unique([userId, name])
+    @@unique([userId, name, type])
 }
 
 model Transaction {
@@ -47,8 +49,8 @@ model Transaction {
     userId String
     user   User   @relation(fields: [userId], references: [id])
 
-    categoryId String
-    category   Category @relation(fields: [categoryId], references: [id])
+    categoryId String?
+    category   Category? @relation(fields: [categoryId], references: [id])
 
     @@index([userId, date])
 }
