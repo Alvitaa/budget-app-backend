@@ -4,6 +4,7 @@ import { CategoryService } from "./category.service";
 import { CategoryDTO } from "./DTOs/category.dto";
 import { TransactionType } from "@prisma/client";
 import { UpdateCategoryDTO } from "./DTOs/updateCategory.dto";
+import { GetCategoryDTO } from "./DTOs/getCategory.dto";
 
 @UseGuards(JwtAuthGuard)
 @Controller("categories")
@@ -16,9 +17,9 @@ export class CategoryController {
     }
 
     @Get()
-    async getCategories(@Req() req, @Query("type") type?: TransactionType) {
+    async getCategories(@Req() req, @Query() query: GetCategoryDTO) {
         const userId = req.user.id;
-        return this.categoryService.getCategories(userId, type);
+        return this.categoryService.getCategories(userId, query.type);
     }
 
     @Get(":id")

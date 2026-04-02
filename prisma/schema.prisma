@@ -20,6 +20,7 @@ model User {
 
     transactions Transaction[]
     categories   Category[]
+    accounts     Account[]
 }
 
 model Category {
@@ -36,6 +37,19 @@ model Category {
     @@unique([userId, name, type])
 }
 
+model Account {
+    id      String @id @default(uuid())
+    name    String
+    balance Float  @default(0)
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id])
+
+    transactions Transaction[]
+
+    createdAt DateTime @default(now())
+}
+
 model Transaction {
     id          String          @id @default(uuid())
     title       String
@@ -50,7 +64,9 @@ model Transaction {
     user   User   @relation(fields: [userId], references: [id])
 
     categoryId String?
-    category   Category? @relation(fields: [categoryId], references: [id])
+    category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+    accountId  String?
+    account    Account?  @relation(fields: [accountId], references: [id], onDelete: SetNull)
 
     @@index([userId, date])
 }
