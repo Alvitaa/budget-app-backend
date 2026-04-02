@@ -10,6 +10,9 @@ import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcryptjs";
 import { AuthUserDTO } from "./DTOs/authUser.dto";
 import { UserWithIdDTO } from "src/user/DTOs/UserResponseWithId.dto";
+import { ValidatedUserDTO } from "./DTOs/validatedUser.dto";
+import { UserJwtResponse } from "./user-jwt.interface";
+import { UserResponseDTO } from "src/user/DTOs/UserResponse.dto";
 
 @Injectable()
 export class AuthService {
@@ -17,6 +20,10 @@ export class AuthService {
         private userService: UserService,
         private jwtService: JwtService,
     ) {}
+
+    async validateUserByEmail(userEmail: string): Promise<UserResponseDTO | null> {
+        return await this.userService.user({email: userEmail});
+    }
 
     async register(dto: RegisterDTO): Promise<UserWithIdDTO> {
         const existing = await this.userService.getUserByEmail({email: dto.email})
@@ -40,7 +47,7 @@ export class AuthService {
         };
     }
 
-    async login(dto: LoginDTO): Promise<{ access_token: string }> {
+    async login(dto: LoginDTO): Promise<UserJwtResponse> {
         const user = await this.userService.getUserByEmail({email: dto.email})
 
         if (!user) throw new UnauthorizedException("Invalid credentials.");
@@ -49,10 +56,11 @@ export class AuthService {
 
         if (!valid) throw new UnauthorizedException("Invalid credentials.");
 
-        const payload = { userId: user.id };
+        const {password, ...result} = user;
+        const payload = { result };
+        const accessToken = await this.jwtService.signAsync(payload)
 
-        return {
-            access_token: await this.jwtService.signAsync(payload),
-        };
+        const signInResponse = { user: result, accessToken };
+        return signInResponse;
     }
 }
