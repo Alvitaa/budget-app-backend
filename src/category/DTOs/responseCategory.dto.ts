@@ -10,4 +10,7 @@ export class ResponseCategoryDTO {
 
     @IsEnum(TransactionType)
     type: TransactionType;
+
+    @IsUUID()
+    userId: string;
 }

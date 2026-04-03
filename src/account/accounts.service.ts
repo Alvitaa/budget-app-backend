@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateAccountDTO } from "./DTOs/createAccount.dto";
 import { Prisma } from "@prisma/client";
@@ -25,6 +25,7 @@ export class AccountService {
                     id: true,
                     name: true,
                     balance: true,
+                userId: true,
                 },
             });
         } catch (e) {
@@ -49,6 +50,7 @@ export class AccountService {
                 id: true,
                 name: true,
                 balance: true,
+                userId: true,
             },
         });
     }
@@ -63,6 +65,7 @@ export class AccountService {
                 id: true,
                 name: true,
                 balance: true,
+                userId: true,
             }
         });
 
@@ -72,7 +75,11 @@ export class AccountService {
     }
 
     async updateAccount(userId: string, accountId: string, dto: UpdateAccountDTO): Promise<ResponseAccountDTO> {
-        await this.getAccountById(userId, accountId);
+        const account = await this.getAccountById(userId, accountId);
+
+        if (userId !== account.userId) {
+            throw new ForbiddenException("Can't update other user's account")
+        }
 
         return this.prisma.account.update({
             where: {
@@ -85,12 +92,17 @@ export class AccountService {
                 id: true,
                 name: true,
                 balance: true,
+                userId: true,
             }
         })
     }
 
     async deleteAccount(userId: string, accountId: string): Promise<ResponseAccountDTO> {
-        await this.getAccountById(userId, accountId);
+        const account = await this.getAccountById(userId, accountId);
+
+        if (userId !== account.userId) {
+            throw new ForbiddenException("Can't delete other user's account")
+        }
 
         return this.prisma.account.delete({
             where: {
@@ -100,6 +112,7 @@ export class AccountService {
                 id: true,
                 name: true,
                 balance: true,
+                userId: true,
             }
         })
     }

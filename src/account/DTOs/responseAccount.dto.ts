@@ -8,5 +8,8 @@ export class ResponseAccountDTO {
     name: string;
 
     @IsNumber()
-    balance?: number;
+    balance: number;
+
+    @IsUUID()
+    userId: string;
 }

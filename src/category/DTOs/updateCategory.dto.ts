@@ -1,10 +1,12 @@
 import { TransactionType } from "@prisma/client";
-import { IsEnum, IsString } from "class-validator";
+import { IsEnum, IsOptional, IsString } from "class-validator";
 
 export class UpdateCategoryDTO {
+    @IsOptional()
     @IsString()
     name?: string;
 
+    @IsOptional()
     @IsEnum(TransactionType)
     type?: TransactionType;
 }

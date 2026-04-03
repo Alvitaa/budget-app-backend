@@ -1,5 +1,6 @@
 import {
     BadRequestException,
+    ForbiddenException,
     Injectable,
     NotFoundException,
 } from "@nestjs/common";
@@ -30,6 +31,7 @@ export class CategoryService {
                     id: true,
                     name: true,
                     type: true,
+                    userId: true,
                 },
             });
         } catch (e) {
@@ -58,6 +60,7 @@ export class CategoryService {
                 id: true,
                 name: true,
                 type: true,
+                userId: true,
             },
         });
     }
@@ -75,6 +78,7 @@ export class CategoryService {
 				id: true,
                 name: true,
                 type: true,
+                userId: true,
 			}
         });
 
@@ -90,7 +94,11 @@ export class CategoryService {
         categoryId: string,
         dto: UpdateCategoryDTO,
     ): Promise<ResponseCategoryDTO> {
-        await this.getCategoryById(userId, categoryId);
+        const category = await this.getCategoryById(userId, categoryId);
+
+        if (userId !== category.userId) {
+            throw new ForbiddenException("Can't update other user's category")
+        }
 
         return this.prisma.category.update({
             where: {
@@ -103,6 +111,7 @@ export class CategoryService {
                 id: true,
                 name: true,
                 type: true,
+                userId: true,
             },
         });
     }
@@ -111,7 +120,11 @@ export class CategoryService {
         userId: string,
         categoryId: string,
     ): Promise<ResponseCategoryDTO> {
-        await this.getCategoryById(userId, categoryId);
+        const category = await this.getCategoryById(userId, categoryId);
+
+        if (userId !== category.userId) {
+            throw new ForbiddenException("Can't delete other user's category")
+        }
 
         return this.prisma.category.delete({
             where: {
@@ -121,6 +134,7 @@ export class CategoryService {
                 id: true,
                 name: true,
                 type: true,
+                userId: true,
             },
         });
     }

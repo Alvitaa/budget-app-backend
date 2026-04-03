@@ -11,7 +11,8 @@ export class AccountController {
 
     @Post()
     async createAccount(@Req() req, @Body() body: CreateAccountDTO) {
-        return this.accountService.createAccount(req.user.id, body)
+        const userId = req.user.id;
+        return this.accountService.createAccount(userId, body)
     }
 
     @Get()
