@@ -8,11 +8,8 @@ import { RegisterDTO } from "./DTOs/register.dto";
 import { LoginDTO } from "./DTOs/login.dto";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcryptjs";
-import { AuthUserDTO } from "./DTOs/authUser.dto";
-import { UserWithIdDTO } from "src/user/DTOs/UserResponseWithId.dto";
-import { ValidatedUserDTO } from "./DTOs/validatedUser.dto";
 import { UserJwtResponse } from "./user-jwt.interface";
-import { UserResponseDTO } from "src/user/DTOs/UserResponse.dto";
+import { ResponseUserDTO } from "src/user/DTOs/responseUser.dto";
 
 @Injectable()
 export class AuthService {
@@ -21,12 +18,12 @@ export class AuthService {
         private jwtService: JwtService,
     ) {}
 
-    async validateUserByEmail(userEmail: string): Promise<UserResponseDTO | null> {
+    async validateUserByEmail(userEmail: string): Promise<ResponseUserDTO | null> {
         return await this.userService.user({email: userEmail});
     }
 
-    async register(dto: RegisterDTO): Promise<UserWithIdDTO> {
-        const existing = await this.userService.getUserByEmail({email: dto.email})
+    async register(dto: RegisterDTO): Promise<UserJwtResponse> {
+        const existing = await this.userService.getUserByEmail(dto.email)
 
         if (existing) throw new BadRequestException("Email already in use.");
 
@@ -40,15 +37,16 @@ export class AuthService {
             password: hashedPassword,
         });
 
-        return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-        };
+        const {name, ...result} = user;
+        const payload = { result };
+        const accessToken = await this.jwtService.signAsync(payload)
+
+        const registeredResponse = { user: result, accessToken };
+        return registeredResponse;
     }
 
     async login(dto: LoginDTO): Promise<UserJwtResponse> {
-        const user = await this.userService.getUserByEmail({email: dto.email})
+        const user = await this.userService.getUserByEmail(dto.email)
 
         if (!user) throw new UnauthorizedException("Invalid credentials.");
 
