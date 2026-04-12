@@ -3,7 +3,7 @@ import { IsNumber, IsOptional, IsString } from "class-validator";
 export class UpdateAccountDTO {
     @IsOptional()
     @IsString()
-    title?: string;
+    name?: string;
 
     @IsOptional()
     @IsNumber()

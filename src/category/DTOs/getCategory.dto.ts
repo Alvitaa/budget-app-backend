@@ -1,9 +1,8 @@
-import { Optional } from "@nestjs/common";
 import { TransactionType } from "@prisma/client";
-import { IsEnum } from "class-validator";
+import { IsEnum, IsOptional } from "class-validator";
 
 export class GetCategoryDTO {
-    @Optional()
+    @IsOptional()
     @IsEnum(TransactionType)
     type?: TransactionType;
 }

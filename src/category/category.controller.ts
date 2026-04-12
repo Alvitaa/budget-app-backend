@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpCode,
+    Param,
+    Patch,
+    Post,
+    Query,
+    Req,
+    UseGuards,
+} from "@nestjs/common";
 import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
 import { CategoryService } from "./category.service";
 import { CategoryDTO } from "./DTOs/category.dto";

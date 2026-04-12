@@ -3,6 +3,7 @@ import { AppModule } from "./app.module";
 import { ValidationPipe } from "@nestjs/common";
 import { databaseConstants } from "./constants";
 import { validationExceptionFactory } from "./common/factories/validationException.factory";
+import cookieParser from "cookie-parser";
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -14,6 +15,8 @@ async function bootstrap() {
             exceptionFactory: validationExceptionFactory
         }),
     );
+
+    app.use(cookieParser())
 
     app.enableCors({
         origin: ["http://localhost:3000"],
