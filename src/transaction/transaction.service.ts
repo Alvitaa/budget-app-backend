@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+    NotFoundException,
+} from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateTransactionDTO } from "./DTOs/createTransaction.dto";
 import { CategoryService } from "src/category/category.service";
@@ -36,16 +41,67 @@ export class TransactionService {
                 date: new Date(dto.date),
                 userId,
             },
-            include: {
-                category: true,
-                account: true,
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                amount: true,
+                type: true,
+                date: true,
+                userId: true,
+                category: {
+                    select: {
+                        name: true,
+                    },
+                },
+                account: {
+                    select: {
+                        name: true,
+                    },
+                },
             },
         });
     }
 
-    async getTransactionsByMonth(userId: string, dto: GetTransactionsDTO) {
-        const start = new Date(dto.year, dto.month - 1, 1);
-        const end = new Date(dto.year, dto.month, 0);
+    async getTransactions(userId: string, skip: number = 0) {
+        return this.prisma.transaction.findMany({
+            where: {
+                userId,
+            },
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                amount: true,
+                type: true,
+                date: true,
+                userId: true,
+                category: {
+                    select: {
+                        name: true,
+                    },
+                },
+                account: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
+            orderBy: {
+                date: "desc",
+            },
+            skip: skip,
+        });
+    }
+
+    async getTransactionsByMonth(
+        userId: string,
+        year: number,
+        month: number,
+        skip: number = 0,
+    ) {
+        const start = new Date(year, month - 1, 1);
+        const end = new Date(year, month, 0);
 
         return this.prisma.transaction.findMany({
             where: {
@@ -55,16 +111,30 @@ export class TransactionService {
                     lte: end,
                 },
             },
-            include: {
-                category: true,
-                account: true,
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                amount: true,
+                type: true,
+                date: true,
+                userId: true,
+                category: {
+                    select: {
+                        name: true,
+                    },
+                },
+                account: {
+                    select: {
+                        name: true,
+                    },
+                },
             },
             orderBy: {
                 date: "desc",
             },
-            take: 20,
-            skip: dto.skip
-        })
+            skip: skip,
+        });
     }
 
     async getTransactionById(userId: string, transactionId: string) {
@@ -72,19 +142,47 @@ export class TransactionService {
             where: {
                 id: transactionId,
                 userId,
-            }
-        })
+            },
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                amount: true,
+                type: true,
+                date: true,
+                userId: true,
+                category: {
+                    select: {
+                        name: true,
+                    },
+                },
+                account: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
+        });
 
         if (!transaction) throw new NotFoundException("Transaction not found");
 
         return transaction;
     }
 
-    async updateTransaction(userId: string, transactionId: string, dto: UpdateTransactionDTO) {
-        const transaction = await this.getTransactionById(userId, transactionId);
+    async updateTransaction(
+        userId: string,
+        transactionId: string,
+        dto: UpdateTransactionDTO,
+    ) {
+        const transaction = await this.getTransactionById(
+            userId,
+            transactionId,
+        );
 
         if (userId !== transaction.userId) {
-            throw new ForbiddenException("Can't delete other user's transaction")
+            throw new ForbiddenException(
+                "Can't delete other user's transaction",
+            );
         }
 
         if (dto.categoryId) {
@@ -107,24 +205,44 @@ export class TransactionService {
                 id: transactionId,
             },
             data: dto,
-            include: {
-                category: true,
-                account: true,
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                amount: true,
+                type: true,
+                date: true,
+                userId: true,
+                category: {
+                    select: {
+                        name: true,
+                    },
+                },
+                account: {
+                    select: {
+                        name: true,
+                    },
+                },
             },
-        })
+        });
     }
 
     async deleteTransaction(userId: string, transactionId: string) {
-        const transaction = await this.getTransactionById(userId, transactionId);
+        const transaction = await this.getTransactionById(
+            userId,
+            transactionId,
+        );
 
         if (userId !== transaction.userId) {
-            throw new ForbiddenException("Can't delete other user's transaction")
+            throw new ForbiddenException(
+                "Can't delete other user's transaction",
+            );
         }
 
         return this.prisma.user.delete({
             where: {
-                id: transactionId
-            }
-        })
+                id: transactionId,
+            },
+        });
     }
 }

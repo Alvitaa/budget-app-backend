@@ -7,6 +7,7 @@ import {
     Param,
     Patch,
     Post,
+    Query,
     Req,
     UseGuards,
 } from "@nestjs/common";
@@ -28,9 +29,20 @@ export class TransactionController {
     }
 
     @Get()
-    async getTransactions(@Req() req, @Body() body: GetTransactionsDTO) {
+    async getTransactions(@Req() req, @Query() query: GetTransactionsDTO) {
         const userId = req.user.id;
-        return this.transactionService.getTransactionsByMonth(userId, body);
+        const { year, month, skip = 0 } = query;
+
+        if (!year || !month) {
+            return this.transactionService.getTransactions(userId, skip)
+        }
+
+        return this.transactionService.getTransactionsByMonth(
+            userId,
+            year,
+            month,
+            skip,
+        );
     }
 
     @Get(":id")
@@ -49,7 +61,11 @@ export class TransactionController {
         @Body() dto: UpdateTransactionDTO,
     ) {
         const userId = req.user.id;
-        return this.transactionService.updateTransaction(userId, transactionId, dto);
+        return this.transactionService.updateTransaction(
+            userId,
+            transactionId,
+            dto,
+        );
     }
 
     @Delete(":id")
