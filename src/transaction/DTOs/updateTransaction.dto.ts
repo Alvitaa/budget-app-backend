@@ -1,4 +1,5 @@
 import { TransactionType } from "@prisma/client";
+import { Transform, Type } from "class-transformer";
 import {
     IsDateString,
     IsEnum,
@@ -19,6 +20,7 @@ export class UpdateTransactionDTO {
     description?: string;
 
     @IsOptional()
+    @Type(() => Number)
     @IsNumber()
     @Min(0.01)
     amount?: number;
@@ -32,10 +34,12 @@ export class UpdateTransactionDTO {
     date?: string;
 
     @IsOptional()
+    @Transform(({ value }) => value === "" ? undefined : value)
     @IsUUID()
     categoryId?: string;
 
     @IsOptional()
+    @Transform(({ value }) => value === "" ? undefined : value)
     @IsUUID()
     accountId?: string;
 }

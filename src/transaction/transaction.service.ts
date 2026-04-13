@@ -51,6 +51,7 @@ export class TransactionService {
                 userId: true,
                 category: {
                     select: {
+                        id: true,
                         name: true,
                     },
                 },
@@ -78,6 +79,7 @@ export class TransactionService {
                 userId: true,
                 category: {
                     select: {
+                        id: true,
                         name: true,
                     },
                 },
@@ -121,6 +123,7 @@ export class TransactionService {
                 userId: true,
                 category: {
                     select: {
+                        id: true,
                         name: true,
                     },
                 },
@@ -153,6 +156,7 @@ export class TransactionService {
                 userId: true,
                 category: {
                     select: {
+                        id: true,
                         name: true,
                     },
                 },
@@ -215,6 +219,7 @@ export class TransactionService {
                 userId: true,
                 category: {
                     select: {
+                        id: true,
                         name: true,
                     },
                 },
@@ -239,7 +244,7 @@ export class TransactionService {
             );
         }
 
-        return this.prisma.user.delete({
+        return this.prisma.transaction.delete({
             where: {
                 id: transactionId,
             },
