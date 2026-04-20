@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import { IsNumber, IsOptional, IsString } from "class-validator";
 
 export class UpdateAccountDTO {
@@ -6,6 +7,7 @@ export class UpdateAccountDTO {
     name?: string;
 
     @IsOptional()
+    @Type(() => Number)
     @IsNumber()
     balance?: number;
 }

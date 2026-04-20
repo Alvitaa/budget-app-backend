@@ -97,6 +97,25 @@ export class AccountService {
         })
     }
 
+    async incrementAccountBalance(userId: string, accountId: string, delta: number) {
+        console.log("incrementing balance")
+        console.log("account id:", accountId)
+        const account = await this.getAccountById(userId, accountId);
+
+        if (userId !== account.userId) {
+            throw new ForbiddenException("Can't update other user's account")
+        }
+
+        await this.prisma.account.update({
+            where: {id: accountId},
+            data: {
+                balance: {
+                    increment: delta
+                }
+            }
+        })
+    }
+
     async deleteAccount(userId: string, accountId: string): Promise<ResponseAccountDTO> {
         const account = await this.getAccountById(userId, accountId);
 
