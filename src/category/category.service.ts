@@ -68,8 +68,10 @@ export class CategoryService {
     async getCategoryById(
         userId: string,
         categoryId: string,
+        tx?: Prisma.TransactionClient
     ): Promise<ResponseCategoryDTO> {
-        const category = await this.prisma.category.findFirst({
+        const client = tx ?? this.prisma;
+        const category = await client.category.findFirst({
             where: {
                 id: categoryId,
                 userId,
@@ -86,6 +88,10 @@ export class CategoryService {
             throw new NotFoundException("Category not found");
         }
 
+        if (userId !== category.userId) {
+            throw new ForbiddenException("Can't access other user's category")
+        }
+
         return category;
     }
 
@@ -94,11 +100,7 @@ export class CategoryService {
         categoryId: string,
         dto: UpdateCategoryDTO,
     ): Promise<ResponseCategoryDTO> {
-        const category = await this.getCategoryById(userId, categoryId);
-
-        if (userId !== category.userId) {
-            throw new ForbiddenException("Can't update other user's category")
-        }
+        await this.getCategoryById(userId, categoryId);
 
         return this.prisma.category.update({
             where: {
@@ -120,11 +122,7 @@ export class CategoryService {
         userId: string,
         categoryId: string,
     ): Promise<ResponseCategoryDTO> {
-        const category = await this.getCategoryById(userId, categoryId);
-
-        if (userId !== category.userId) {
-            throw new ForbiddenException("Can't delete other user's category")
-        }
+        await this.getCategoryById(userId, categoryId);
 
         return this.prisma.category.delete({
             where: {

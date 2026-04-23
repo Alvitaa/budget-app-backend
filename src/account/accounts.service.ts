@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+    NotFoundException,
+} from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateAccountDTO } from "./DTOs/createAccount.dto";
 import { Prisma } from "@prisma/client";
@@ -25,7 +30,7 @@ export class AccountService {
                     id: true,
                     name: true,
                     balance: true,
-                userId: true,
+                    userId: true,
                 },
             });
         } catch (e) {
@@ -55,18 +60,24 @@ export class AccountService {
         });
     }
 
-    async getAccountById(userId: string, accountId: string): Promise<ResponseAccountDTO> {
-        const account = await this.prisma.account.findFirst({
+    async getAccountById(
+        userId: string,
+        accountId: string,
+        tx?: Prisma.TransactionClient,
+    ): Promise<ResponseAccountDTO> {
+        const client = tx ?? this.prisma;
+
+        const account = await client.account.findFirst({
             where: {
                 id: accountId,
-                userId
+                userId,
             },
             select: {
                 id: true,
                 name: true,
                 balance: true,
                 userId: true,
-            }
+            },
         });
 
         if (!account) throw new NotFoundException("Account not found");
@@ -74,11 +85,15 @@ export class AccountService {
         return account;
     }
 
-    async updateAccount(userId: string, accountId: string, dto: UpdateAccountDTO): Promise<ResponseAccountDTO> {
+    async updateAccount(
+        userId: string,
+        accountId: string,
+        dto: UpdateAccountDTO,
+    ): Promise<ResponseAccountDTO> {
         const account = await this.getAccountById(userId, accountId);
 
         if (userId !== account.userId) {
-            throw new ForbiddenException("Can't update other user's account")
+            throw new ForbiddenException("Can't update other user's account");
         }
 
         return this.prisma.account.update({
@@ -93,34 +108,42 @@ export class AccountService {
                 name: true,
                 balance: true,
                 userId: true,
-            }
-        })
+            },
+        });
     }
 
-    async incrementAccountBalance(userId: string, accountId: string, delta: number) {
-        console.log("incrementing balance")
-        console.log("account id:", accountId)
-        const account = await this.getAccountById(userId, accountId);
-
-        if (userId !== account.userId) {
-            throw new ForbiddenException("Can't update other user's account")
-        }
-
-        await this.prisma.account.update({
-            where: {id: accountId},
+    async incrementAccountBalance(
+        userId: string,
+        accountId: string,
+        delta: number,
+        tx?: Prisma.TransactionClient,
+    ) {
+        const client = tx ?? this.prisma;
+        const result = await client.account.updateMany({
+            where: {
+                id: accountId,
+                userId,
+            },
             data: {
                 balance: {
-                    increment: delta
-                }
-            }
-        })
+                    increment: delta,
+                },
+            },
+        });
+
+        if (result.count === 0) {
+            throw new ForbiddenException();
+        }
     }
 
-    async deleteAccount(userId: string, accountId: string): Promise<ResponseAccountDTO> {
+    async deleteAccount(
+        userId: string,
+        accountId: string,
+    ): Promise<ResponseAccountDTO> {
         const account = await this.getAccountById(userId, accountId);
 
         if (userId !== account.userId) {
-            throw new ForbiddenException("Can't delete other user's account")
+            throw new ForbiddenException("Can't delete other user's account");
         }
 
         return this.prisma.account.delete({
@@ -132,7 +155,7 @@ export class AccountService {
                 name: true,
                 balance: true,
                 userId: true,
-            }
-        })
+            },
+        });
     }
 }
