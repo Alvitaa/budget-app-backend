@@ -4,7 +4,7 @@ import { IsDateString, IsEnum, IsNumber, IsOptional, IsString, IsUUID, Min } fro
 
 export class CreateTransactionDTO {
     @IsString()
-    title: string;
+    title!: string;
 
     @IsOptional()
     @IsString()
@@ -13,13 +13,13 @@ export class CreateTransactionDTO {
     @Type(() => Number)
     @IsNumber()
     @Min(0.01)
-    amount: number;
+    amount!: number;
 
     @IsEnum(TransactionType)
-    type: TransactionType;
+    type!: TransactionType;
 
     @IsDateString()
-    date: string;
+    date!: string;
 
     @IsOptional()
     @Transform(({ value }) => value === "" ? undefined : value)
@@ -30,4 +30,9 @@ export class CreateTransactionDTO {
     @Transform(({ value }) => value === "" ? undefined : value)
     @IsUUID()
     accountId?: string;
+
+    @IsOptional()
+    @Transform(({ value }) => value === "" ? undefined : value)
+    @IsUUID()
+    transferId?: string;
 }
