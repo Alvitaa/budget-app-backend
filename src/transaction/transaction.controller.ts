@@ -31,10 +31,10 @@ export class TransactionController {
     @Get()
     async getTransactions(@Req() req, @Query() query: GetTransactionsDTO) {
         const userId = req.user.id;
-        const { year, month, skip = 0 } = query;
+        const { year, month, take, skip } = query;
 
         if (!year || !month) {
-            return this.transactionService.getTransactions(userId, skip)
+            return this.transactionService.getTransactions(userId, take, skip)
         }
 
         return this.transactionService.getTransactionsByMonth(

@@ -115,10 +115,10 @@ export class TransferService {
             await this.transactionService.createTransaction(
                 userId,
                 {
-                    title: "Transfer from " + fromAccount.name,
+                    title: "Trans. from " + fromAccount.name,
                     type: "EXPENSE",
                     amount,
-                    accountId: fromAccountId,
+                    accountId: toAccountId,
                     transferId: transfer.id,
                     date: date.toISOString().split("T")[0],
                 },
@@ -128,10 +128,10 @@ export class TransferService {
             await this.transactionService.createTransaction(
                 userId,
                 {
-                    title: "Transfer to " + toAccount.name,
+                    title: "Trans. to " + toAccount.name,
                     type: "INCOME",
                     amount,
-                    accountId: toAccountId,
+                    accountId: fromAccountId,
                     transferId: transfer.id,
                     date: date.toISOString().split("T")[0],
                 },
@@ -193,8 +193,8 @@ export class TransferService {
                     expenseTx.id,
                     {
                         amount,
-                        title: "Transferred from " + expenseTx.account?.name,
-                        accountId: fromAccountId,
+                        title: "Trans. from " + expenseTx.account?.name,
+                        accountId: toAccountId,
                     },
                     tx,
                 );
@@ -204,7 +204,7 @@ export class TransferService {
                 await this.transactionService.updateTransaction(
                     userId,
                     incomeTx.id,
-                    { amount, title: "Transferred to " + incomeTx.account?.name, accountId: toAccountId },
+                    { amount, title: "Trans. to " + incomeTx.account?.name, accountId: fromAccountId },
                     tx,
                 );
             }

@@ -1,17 +1,24 @@
-import { IsNumberString, IsOptional } from "class-validator";
+import { IsNumber, IsNumberString, IsOptional } from "class-validator";
 import { Type } from "class-transformer";
 
 export class GetTransactionsDTO {
     @IsOptional()
     @IsNumberString()
     @Type(() => Number)
-    month: number;
+    month?: number;
 
     @IsOptional()
     @IsNumberString()
     @Type(() => Number)
-    year: number;
+    year?: number;
 
     @IsOptional()
+    @Type(() => Number)
+    @IsNumber()
+    take: number = 20;
+
+    @IsOptional()
+    @Type(() => Number)
+    @IsNumber()
     skip: number = 0;
 }

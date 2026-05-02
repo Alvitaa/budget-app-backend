@@ -88,7 +88,6 @@ export class TransactionService {
     }
 
     async getTransactions(userId: string, take: number, skip: number) {
-        console.log(take, skip)
         return this.prisma.transaction.findMany({
             where: {
                 userId,
@@ -240,7 +239,7 @@ export class TransactionService {
 
                 const newType = dto.type ?? transaction.type;
 
-                if (category.type !== newType){
+                if (category.type !== newType) {
                     throw new BadRequestException(
                         "Category type does not match transaction type",
                     );
@@ -357,10 +356,32 @@ export class TransactionService {
     async deleteTransaction(userId: string, transactionId: string) {
         await this.getTransactionById(userId, transactionId);
 
-        return this.prisma.transaction.delete({
-            where: {
-                id: transactionId,
-            },
+        return this.prisma.$transaction(async (tx) => {
+            const transaction = await this.getTransactionById(
+                userId,
+                transactionId,
+                tx,
+            );
+
+            const accountId = transaction.account?.id ?? null;
+
+            if (accountId) {
+                const delta = this.getDelta(
+                    transaction.type,
+                    transaction.amount,
+                );
+
+                await this.accountService.incrementAccountBalance(
+                    userId,
+                    accountId,
+                    -delta,
+                    tx,
+                );
+            }
+
+            return tx.transaction.delete({
+                where: { id: transactionId },
+            });
         });
     }
 }
