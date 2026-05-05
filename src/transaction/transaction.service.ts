@@ -113,22 +113,27 @@ export class TransactionService {
                     },
                 },
             },
-            orderBy: {
-                date: "desc",
-            },
-            take: Number(take),
-            skip: Number(skip),
+            orderBy: { date: "desc" },
+            take: take,
+            skip: skip,
         });
     }
 
-    async getTransactionsByMonth(
+    async getTransactionsByDate(
         userId: string,
         year: number,
-        month: number,
+        month?: number,
+        take: number = 20,
         skip: number = 0,
     ) {
-        const start = new Date(year, month - 1, 1);
-        const end = new Date(year, month, 0);
+        let start, end;
+        if (month !== undefined) {
+            start = new Date(year, month - 1, 1);
+            end = new Date(year, month, 0);
+        } else {
+            start = new Date(year, 0, 1);
+            end = new Date(year, 12, 0);
+        }
 
         return this.prisma.transaction.findMany({
             where: {
@@ -162,7 +167,8 @@ export class TransactionService {
             orderBy: {
                 date: "desc",
             },
-            skip: skip,
+            take: take,
+            skip: skip
         });
     }
 

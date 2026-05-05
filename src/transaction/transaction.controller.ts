@@ -33,16 +33,11 @@ export class TransactionController {
         const userId = req.user.id;
         const { year, month, take, skip } = query;
 
-        if (!year || !month) {
+        if (!year) {
             return this.transactionService.getTransactions(userId, take, skip)
         }
 
-        return this.transactionService.getTransactionsByMonth(
-            userId,
-            year,
-            month,
-            skip,
-        );
+        return this.transactionService.getTransactionsByDate(userId, year, month, take, skip);
     }
 
     @Get(":id")

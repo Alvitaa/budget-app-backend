@@ -20,19 +20,73 @@ export class TransferService {
         private accountService: AccountService,
     ) {}
 
-    async getTransfers(userId: string): Promise<ResponseTransferDTO[]> {
+    async getTransfers(userId: string, take: number, skip: number): Promise<ResponseTransferDTO[]> {
         const transfers = await this.prisma.transfer.findMany({
             where: { userId },
             include: {
                 transactions: {
                     include: {
                         account: {
-                            select: { id: true, name: true },
+                            select: {
+                                id: true,
+                                name: true
+                            },
                         },
                     },
                 },
             },
             orderBy: { date: "desc" },
+            take: take,
+            skip: skip,
+        });
+
+        return transfers.map((t) => {
+            const fromTx = t.transactions.find((tx) => tx.type === "EXPENSE");
+            const toTx = t.transactions.find((tx) => tx.type === "INCOME");
+
+            return {
+                id: t.id,
+                amount: t.amount,
+                date: t.date,
+                fromAccount: fromTx?.account ?? null,
+                toAccount: toTx?.account ?? null,
+            };
+        });
+    }
+
+    async getTransfersByDate(userId: string, year: number, month?: number, take: number = 20, skip: number = 0): Promise<ResponseTransferDTO[]> {
+        let start, end;
+        if (month !== undefined) {
+            start = new Date(year, month - 1, 1);
+            end = new Date(year, month, 0);
+        } else {
+            start = new Date(year, 0, 1);
+            end = new Date(year, 12, 0);
+        }
+
+        const transfers = await this.prisma.transfer.findMany({
+            where: {
+                userId,
+                date: {
+                    gte: start,
+                    lte: end
+                }
+            },
+            include: {
+                transactions: {
+                    include: {
+                        account: {
+                            select: {
+                                id: true,
+                                name: true
+                            },
+                        },
+                    },
+                },
+            },
+            orderBy: { date: "desc" },
+            take: take,
+            skip: skip,
         });
 
         return transfers.map((t) => {
