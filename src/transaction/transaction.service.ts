@@ -132,7 +132,14 @@ export class TransactionService {
                     },
                 },
             },
-            orderBy: { date: "desc" },
+            orderBy: [
+                {
+                    date: "desc",
+                },
+                {
+                    createdAt: "desc"
+                }
+            ],
             take: take,
             skip: skip,
         });
@@ -181,9 +188,14 @@ export class TransactionService {
                     },
                 },
             },
-            orderBy: {
-                date: "desc",
-            },
+            orderBy: [
+                {
+                    date: "desc",
+                },
+                {
+                    createdAt: "desc"
+                }
+            ],
             take: take,
             skip: skip,
         });
@@ -294,6 +306,7 @@ export class TransactionService {
                 },
                 data: {
                     ...dto,
+                    date: new Date(dto.date!),
                     categoryId,
                     accountId,
                 },

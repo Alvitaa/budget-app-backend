@@ -53,9 +53,10 @@ export class CategoryService {
                 userId,
                 ...(type && { type }),
             },
-            orderBy: {
-                name: "asc",
-            },
+            orderBy: [
+                {type: "asc"},
+                {name: "asc"}
+            ],
             select: {
                 id: true,
                 name: true,
