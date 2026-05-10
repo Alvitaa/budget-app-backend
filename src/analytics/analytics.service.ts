@@ -53,9 +53,9 @@ export class AnalyticsService {
             result.find((r) => r.type === "SAVING")?._sum.amount || 0;
 
         return {
-            income,
-            expense,
-            saving,
+            income: Number(income),
+            expense: Number(expense),
+            saving: Number(saving),
         };
     }
 
@@ -105,7 +105,7 @@ export class AnalyticsService {
         return categories.map((category) => ({
             id: category.id != "" ? category.id : null,
             name: category.name,
-            total: category.id == "" ? resultMap.get(null) || 0 : resultMap.get(category.id) || 0
+            total: category.id == "" ? Number(resultMap.get(null)) || 0 : Number(resultMap.get(category.id)) || 0
         }))
     }
 }

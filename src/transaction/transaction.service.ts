@@ -13,6 +13,7 @@ import { GetTransactionsDTO } from "./DTOs/getTransactions.dto";
 import { Prisma, TransactionType } from "@prisma/client";
 import { ResponseTransactionDTO } from "./DTOs/responseTransaction.dto";
 import { getDateRange } from "src/common/utils/dateRange";
+import { Decimal } from "@prisma/client/runtime/client";
 
 @Injectable()
 export class TransactionService {
@@ -34,11 +35,19 @@ export class TransactionService {
         }
     }
 
-    async createTransaction(userId: string, dto: CreateTransactionDTO, tx?: Prisma.TransactionClient) {
+    async createTransaction(
+        userId: string,
+        dto: CreateTransactionDTO,
+        tx?: Prisma.TransactionClient,
+    ) {
         const client = tx ?? this.prisma;
         if (dto.categoryId) {
-            const category = await this.categoryService.getCategoryById(userId, dto.categoryId, client);
-            
+            const category = await this.categoryService.getCategoryById(
+                userId,
+                dto.categoryId,
+                client,
+            );
+
             if (category.type !== dto.type)
                 throw new BadRequestException(
                     "Category type does not match transaction type",
@@ -46,7 +55,11 @@ export class TransactionService {
         }
 
         if (dto.accountId) {
-            await this.accountService.getAccountById(userId, dto.accountId, client);
+            await this.accountService.getAccountById(
+                userId,
+                dto.accountId,
+                client,
+            );
 
             const delta = this.getDelta(dto.type, dto.amount);
 
@@ -54,11 +67,11 @@ export class TransactionService {
                 userId,
                 dto.accountId,
                 delta,
-                client
+                client,
             );
         }
 
-        return client.transaction.create({
+        const transaction = await client.transaction.create({
             data: {
                 ...dto,
                 date: new Date(dto.date),
@@ -86,10 +99,15 @@ export class TransactionService {
                 },
             },
         });
+
+        return {
+            ...transaction,
+            amount: Number(transaction.amount)
+        }
     }
 
     async getTransactions(userId: string, take: number, skip: number) {
-        return this.prisma.transaction.findMany({
+        const transactions = await this.prisma.transaction.findMany({
             where: {
                 userId,
             },
@@ -118,6 +136,11 @@ export class TransactionService {
             take: take,
             skip: skip,
         });
+
+        return transactions.map((transaction) => ({
+            ...transaction,
+            amount: Number(transaction.amount)
+        }))
     }
 
     async getTransactionsByDate(
@@ -129,7 +152,7 @@ export class TransactionService {
     ) {
         const { start, end } = getDateRange(year, month);
 
-        return this.prisma.transaction.findMany({
+        const transactions = await this.prisma.transaction.findMany({
             where: {
                 userId,
                 date: {
@@ -162,8 +185,13 @@ export class TransactionService {
                 date: "desc",
             },
             take: take,
-            skip: skip
+            skip: skip,
         });
+
+        return transactions.map((transaction) => ({
+            ...transaction,
+            amount: Number(transaction.amount)
+        }))
     }
 
     async getTransactionById(
@@ -209,17 +237,20 @@ export class TransactionService {
             );
         }
 
-        return transaction;
+        return {
+            ...transaction,
+            amount: Number(transaction.amount),
+        };
     }
 
     async updateTransaction(
         userId: string,
         transactionId: string,
         dto: UpdateTransactionDTO,
-        tx?: Prisma.TransactionClient
+        tx?: Prisma.TransactionClient,
     ) {
         const client = tx ?? this.prisma;
-        
+
         return client.$transaction(async (tx) => {
             const transaction = await this.getTransactionById(
                 userId,
@@ -234,7 +265,7 @@ export class TransactionService {
                 const category = await this.categoryService.getCategoryById(
                     userId,
                     categoryId,
-                    tx
+                    tx,
                 );
 
                 const newType = dto.type ?? transaction.type;
@@ -250,7 +281,12 @@ export class TransactionService {
                 await this.accountService.getAccountById(userId, accountId, tx);
             }
 
-            await this.updateBalanceFromTransaction(userId, dto, transaction, tx);
+            await this.updateBalanceFromTransaction(
+                userId,
+                dto,
+                transaction,
+                tx,
+            );
 
             const updated = await tx.transaction.update({
                 where: {
@@ -284,7 +320,10 @@ export class TransactionService {
                 },
             });
 
-            return updated;
+            return {
+                ...updated,
+                amount: Number(updated.amount)
+            };
         });
     }
 
@@ -379,9 +418,11 @@ export class TransactionService {
                 );
             }
 
-            return tx.transaction.delete({
+            await tx.transaction.delete({
                 where: { id: transactionId },
             });
+
+            return { success: true };
         });
     }
 }

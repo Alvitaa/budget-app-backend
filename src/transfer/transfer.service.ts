@@ -46,7 +46,7 @@ export class TransferService {
 
             return {
                 id: t.id,
-                amount: t.amount,
+                amount: Number(t.amount),
                 date: t.date,
                 fromAccount: fromTx?.account ?? null,
                 toAccount: toTx?.account ?? null,
@@ -95,7 +95,7 @@ export class TransferService {
 
             return {
                 id: t.id,
-                amount: t.amount,
+                amount: Number(t.amount),
                 date: t.date,
                 fromAccount: fromTx?.account ?? null,
                 toAccount: toTx?.account ?? null,
@@ -136,7 +136,7 @@ export class TransferService {
             id: transfer.id,
             fromAccount: fromTx?.account ?? null,
             toAccount: toTx?.account ?? null,
-            amount: transfer.amount,
+            amount: Number(transfer.amount),
             date: transfer.date,
         };
     }
@@ -246,7 +246,7 @@ export class TransferService {
                     userId,
                     expenseTx.id,
                     {
-                        amount,
+                        amount: Number(amount),
                         title: "Trans. from " + expenseTx.account?.name,
                         accountId: toAccountId,
                     },
@@ -258,7 +258,7 @@ export class TransferService {
                 await this.transactionService.updateTransaction(
                     userId,
                     incomeTx.id,
-                    { amount, title: "Trans. to " + incomeTx.account?.name, accountId: fromAccountId },
+                    { amount: Number(amount), title: "Trans. to " + incomeTx.account?.name, accountId: fromAccountId },
                     tx,
                 );
             }
@@ -283,7 +283,7 @@ export class TransferService {
             for (const t of transfer.transactions) {
                 const delta = this.transactionService.getDelta(
                     t.type,
-                    t.amount,
+                    Number(t.amount)
                 );
 
                 await this.accountService.incrementAccountBalance(

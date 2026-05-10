@@ -19,7 +19,7 @@ export class AccountService {
         dto: CreateAccountDTO,
     ): Promise<ResponseAccountDTO> {
         try {
-            return this.prisma.account.create({
+            const account = await this.prisma.account.create({
                 data: {
                     ...dto,
                     user: {
@@ -33,6 +33,11 @@ export class AccountService {
                     userId: true,
                 },
             });
+
+            return {
+                ...account,
+                balance: Number(account.balance)
+            };
         } catch (e) {
             if (e instanceof Prisma.PrismaClientKnownRequestError) {
                 if (e.code === "P2002") {
@@ -44,7 +49,7 @@ export class AccountService {
     }
 
     async getAccounts(userId: string): Promise<ResponseAccountDTO[]> {
-        return this.prisma.account.findMany({
+        const accounts = await this.prisma.account.findMany({
             where: {
                 userId,
             },
@@ -58,6 +63,11 @@ export class AccountService {
                 userId: true,
             },
         });
+
+        return accounts.map((account) => ({
+            ...account,
+            balance: Number(account.balance)
+        }));
     }
 
     async getAccountById(
@@ -82,7 +92,10 @@ export class AccountService {
 
         if (!account) throw new NotFoundException("Account not found");
 
-        return account;
+        return {
+            ...account,
+            balance: Number(account.balance)
+        };
     }
 
     async updateAccount(
@@ -96,7 +109,7 @@ export class AccountService {
             throw new ForbiddenException("Can't update other user's account");
         }
 
-        return this.prisma.account.update({
+        const updatedAccount = await this.prisma.account.update({
             where: {
                 id: accountId,
             },
@@ -110,6 +123,11 @@ export class AccountService {
                 userId: true,
             },
         });
+
+        return {
+            ...updatedAccount,
+            balance: Number(updatedAccount.balance)
+        };
     }
 
     async incrementAccountBalance(
@@ -139,14 +157,14 @@ export class AccountService {
     async deleteAccount(
         userId: string,
         accountId: string,
-    ): Promise<ResponseAccountDTO> {
+    ) {
         const account = await this.getAccountById(userId, accountId);
 
         if (userId !== account.userId) {
             throw new ForbiddenException("Can't delete other user's account");
         }
 
-        return this.prisma.account.delete({
+        await this.prisma.account.delete({
             where: {
                 id: accountId,
             },
@@ -157,5 +175,7 @@ export class AccountService {
                 userId: true,
             },
         });
+
+        return { success: true };
     }
 }

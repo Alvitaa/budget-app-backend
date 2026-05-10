@@ -21,6 +21,7 @@ model User {
     transactions Transaction[]
     categories   Category[]
     accounts     Account[]
+    budgets      Budget[]
 }
 
 model Category {
@@ -33,6 +34,7 @@ model Category {
     user        User        @relation(fields: [userId], references: [id])
 
     transactions Transaction[]
+    budgets      Budget[]
 
     @@unique([userId, name, type])
 }
@@ -40,7 +42,7 @@ model Category {
 model Account {
     id          String      @id @default(uuid())
     name        String
-    balance     Float       @default(0)
+    balance     Decimal       @default(0)
 
     userId      String
     user        User        @relation(fields: [userId], references: [id])
@@ -54,7 +56,7 @@ model Transaction {
     id          String      @id @default(uuid())
     title       String
     description String?
-    amount      Float
+    amount      Decimal
     type        TransactionType
 
     date        DateTime
@@ -74,14 +76,32 @@ model Transaction {
 }
 
 model Transfer {
-  id            String   @id @default(uuid())
-  userId        String
-  fromAccountId String
-  toAccountId   String
-  amount        Float
-  date          DateTime
+    id              String  @id @default(uuid())
+    userId          String
+    fromAccountId   String
+    toAccountId     String
+    amount          Decimal
+    date            DateTime
 
   transactions  Transaction[]
+}
+
+model Budget {
+    id          String  @id @default(uuid())
+    amount      Decimal
+
+    month       Int
+    year        Int
+
+    userId      String
+    user        User    @relation(fields: [userId], references: [id])
+    categoryId  String?
+    category    Category? @relation(fields: [categoryId], references: [id])
+
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@unique([userId, categoryId, month, year])
 }
 
 enum TransactionType {
