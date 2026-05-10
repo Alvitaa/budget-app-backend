@@ -12,6 +12,7 @@ import { UpdateTransactionDTO } from "./DTOs/updateTransaction.dto";
 import { GetTransactionsDTO } from "./DTOs/getTransactions.dto";
 import { Prisma, TransactionType } from "@prisma/client";
 import { ResponseTransactionDTO } from "./DTOs/responseTransaction.dto";
+import { getDateRange } from "src/common/utils/dateRange";
 
 @Injectable()
 export class TransactionService {
@@ -126,21 +127,14 @@ export class TransactionService {
         take: number = 20,
         skip: number = 0,
     ) {
-        let start, end;
-        if (month !== undefined) {
-            start = new Date(year, month - 1, 1);
-            end = new Date(year, month, 0);
-        } else {
-            start = new Date(year, 0, 1);
-            end = new Date(year, 12, 0);
-        }
+        const { start, end } = getDateRange(year, month);
 
         return this.prisma.transaction.findMany({
             where: {
                 userId,
                 date: {
                     gte: start,
-                    lte: end,
+                    lt: end,
                 },
             },
             select: {
@@ -226,7 +220,7 @@ export class TransactionService {
     ) {
         const client = tx ?? this.prisma;
         
-        return this.prisma.$transaction(async (tx) => {
+        return client.$transaction(async (tx) => {
             const transaction = await this.getTransactionById(
                 userId,
                 transactionId,
