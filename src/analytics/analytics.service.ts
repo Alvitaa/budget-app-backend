@@ -35,6 +35,7 @@ export class AnalyticsService {
             by: ["type"],
             where: {
                 userId,
+                transferId: null,
                 date: {
                     gte: start,
                     lt: end,
@@ -70,6 +71,7 @@ export class AnalyticsService {
             where: {
                 userId,
                 type,
+                transferId: null,
                 date: {
                     gte: start,
                     lt: end,
@@ -102,10 +104,23 @@ export class AnalyticsService {
             name: "OTHER"
         })
 
-        return categories.map((category) => ({
+        const categoryBreakdown = categories.map((category) => ({
             id: category.id != "" ? category.id : null,
             name: category.name,
             total: category.id == "" ? Number(resultMap.get(null)) || 0 : Number(resultMap.get(category.id)) || 0
         }))
+
+
+        return categoryBreakdown.sort((n1, n2) => {
+            if (n1.total < n2.total) {
+                return 1;
+            }
+
+            if (n1.total > n2.total) {
+                return -1;
+            }
+
+            return 0;
+        })
     }
 }

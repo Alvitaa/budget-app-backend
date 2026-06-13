@@ -155,7 +155,7 @@ export class TransferService {
                 tx,
             );
 
-            const date = new Date();
+            const date = new Date(dto.date);
             const transfer = await tx.transfer.create({
                 data: {
                     userId,
@@ -170,7 +170,7 @@ export class TransferService {
                 userId,
                 {
                     title: "Trans. from " + fromAccount.name,
-                    type: "EXPENSE",
+                    type: "INCOME",
                     amount,
                     accountId: toAccountId,
                     transferId: transfer.id,
@@ -183,7 +183,7 @@ export class TransferService {
                 userId,
                 {
                     title: "Trans. to " + toAccount.name,
-                    type: "INCOME",
+                    type: "EXPENSE",
                     amount,
                     accountId: fromAccountId,
                     transferId: transfer.id,
@@ -220,6 +220,7 @@ export class TransferService {
             const amount = dto.amount ?? transfer.amount;
             const fromAccountId = dto.fromAccountId ?? transfer.fromAccountId;
             const toAccountId = dto.toAccountId ?? transfer.toAccountId;
+            const date = dto.date ?? transfer.date;
 
             if (fromAccountId === toAccountId) {
                 throw new BadRequestException("Same account");
@@ -231,6 +232,7 @@ export class TransferService {
                     amount,
                     fromAccountId,
                     toAccountId,
+                    date: new Date(date)
                 },
             });
 
@@ -249,6 +251,7 @@ export class TransferService {
                         amount: Number(amount),
                         title: "Trans. from " + expenseTx.account?.name,
                         accountId: toAccountId,
+                        date
                     },
                     tx,
                 );
@@ -258,7 +261,7 @@ export class TransferService {
                 await this.transactionService.updateTransaction(
                     userId,
                     incomeTx.id,
-                    { amount: Number(amount), title: "Trans. to " + incomeTx.account?.name, accountId: fromAccountId },
+                    { amount: Number(amount), title: "Trans. to " + incomeTx.account?.name, accountId: fromAccountId, date },
                     tx,
                 );
             }

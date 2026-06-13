@@ -3,13 +3,13 @@ import { Type } from "class-transformer";
 
 export class GetTransactionsDTO {
     @IsOptional()
-    @IsNumberString()
     @Type(() => Number)
+    @IsNumber()
     month?: number;
 
     @IsOptional()
-    @IsNumberString()
     @Type(() => Number)
+    @IsNumber()
     year?: number;
 
     @IsOptional()

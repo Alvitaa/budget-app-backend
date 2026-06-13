@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsNumber, IsOptional, IsUUID, Min } from "class-validator";
+import { IsDateString, IsNumber, IsOptional, IsUUID, Min } from "class-validator";
 
 export class UpdateTransferDTO {
     @IsOptional()
@@ -15,4 +15,8 @@ export class UpdateTransferDTO {
     @IsNumber()
     @Min(0.01)
     amount?: number;
+
+    @IsOptional()
+    @IsDateString()
+    date!: string;
 }
