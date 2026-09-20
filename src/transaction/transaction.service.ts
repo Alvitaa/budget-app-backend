@@ -74,7 +74,8 @@ export class TransactionService {
         const transaction = await client.transaction.create({
             data: {
                 ...dto,
-                date: new Date(dto.date),
+                //Tweak to avoid Timezone bugs in front
+                date: new Date(`${dto.date}T12:00:00.000Z`),
                 userId,
             },
             select: {
@@ -306,7 +307,8 @@ export class TransactionService {
                 },
                 data: {
                     ...dto,
-                    date: new Date(dto.date!),
+                    //Tweak to avoid Timezone bugs in front
+                    date: new Date(`${dto.date}T12:00:00.000Z`),
                     categoryId,
                     accountId,
                 },
