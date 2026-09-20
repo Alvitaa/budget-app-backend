@@ -108,47 +108,59 @@ export class TransactionService {
     }
 
     async getTransactions(userId: string, take: number, skip: number) {
-        const transactions = await this.prisma.transaction.findMany({
-            where: {
+        const where = {
                 userId,
-            },
-            select: {
-                id: true,
-                title: true,
-                description: true,
-                amount: true,
-                type: true,
-                date: true,
-                userId: true,
-                category: {
-                    select: {
-                        id: true,
-                        name: true,
-                    },
-                },
-                account: {
-                    select: {
-                        id: true,
-                        name: true,
-                    },
-                },
-            },
-            orderBy: [
-                {
-                    date: "desc",
-                },
-                {
-                    createdAt: "desc"
-                }
-            ],
-            take: take,
-            skip: skip,
-        });
+        }
 
-        return transactions.map((transaction) => ({
-            ...transaction,
-            amount: Number(transaction.amount)
-        }))
+        const [transactions, total] = await Promise.all([
+            this.prisma.transaction.findMany({
+                where,
+                select: {
+                    id: true,
+                    title: true,
+                    description: true,
+                    amount: true,
+                    type: true,
+                    date: true,
+                    userId: true,
+                    category: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                    account: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
+                orderBy: [
+                    {
+                        date: "desc",
+                    },
+                    {
+                        createdAt: "desc"
+                    }
+                ],
+                take: take,
+                skip: skip,
+            }),
+            this.prisma.transaction.count({
+                where,
+            }),
+        ])
+
+        const data = transactions.map((transaction) => ({
+                ...transaction,
+                amount: Number(transaction.amount)
+            }))
+
+        return {
+            data,
+            total
+        }
     }
 
     async getTransactionsByDate(
