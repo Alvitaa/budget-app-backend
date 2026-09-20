@@ -33,6 +33,12 @@ export class AccountController {
         return this.accountService.updateAccount(userId, accountId, dto);
     }
 
+    @Patch("favorite/:id")
+    async favoriteAccount(@Req() req, @Param("id") accountId: string) {
+        const userId = req.user.id;
+        return this.accountService.favoriteAccount(userId, accountId);
+    }
+
     @Delete(":id")
     @HttpCode(204)
     async deleteAccount(@Req() req, @Param("id") accountId: string) {

@@ -42,7 +42,9 @@ model Category {
 model Account {
     id          String      @id @default(uuid())
     name        String
-    balance     Decimal       @default(0)
+    balance     Decimal     @default(0)
+
+    isFavorite  Boolean     @default(false)
 
     userId      String
     user        User        @relation(fields: [userId], references: [id])

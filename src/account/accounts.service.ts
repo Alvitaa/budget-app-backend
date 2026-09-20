@@ -19,25 +19,29 @@ export class AccountService {
         dto: CreateAccountDTO,
     ): Promise<ResponseAccountDTO> {
         try {
-            const account = await this.prisma.account.create({
-                data: {
-                    ...dto,
-                    user: {
-                        connect: { id: userId },
+            return this.prisma.$transaction(async (tx) => {
+                const account = await this.prisma.account.create({
+                    data: {
+                        ...dto,
+                        user: {
+                            connect: { id: userId },
+                        },
                     },
-                },
-                select: {
-                    id: true,
-                    name: true,
-                    balance: true,
-                    userId: true,
-                },
-            });
+                    select: {
+                        id: true,
+                        name: true,
+                        balance: true,
+                        userId: true,
+                    },
+                });
 
-            return {
-                ...account,
-                balance: Number(account.balance)
-            };
+                this.favoriteAccount(userId, account.id, tx)
+
+                return {
+                    ...account,
+                    balance: Number(account.balance)
+                };
+            })
         } catch (e) {
             if (e instanceof Prisma.PrismaClientKnownRequestError) {
                 if (e.code === "P2002") {
@@ -68,6 +72,32 @@ export class AccountService {
             ...account,
             balance: Number(account.balance)
         }));
+    }
+
+    async favoriteAccount(userId: string, accountId: string, tx?: Prisma.TransactionClient) {
+        const client = tx ?? this.prisma;
+        await client.$transaction([
+            client.account.updateMany({
+                where: {
+                userId,
+                isFavorite: true,
+                },
+                data: {
+                isFavorite: false,
+                },
+            }),
+
+            client.account.update({
+                where: {
+                id: accountId,
+                },
+                data: {
+                isFavorite: true,
+                },
+            }),
+        ]);
+
+        return true
     }
 
     async getAccountById(
