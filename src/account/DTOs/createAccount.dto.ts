@@ -1,12 +1,15 @@
 import { Type } from "class-transformer";
-import { IsNumber, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateAccountDTO {
     @IsString()
-    name: string;
+    name!: string;
 
     @IsOptional()
     @Type(() => Number)
     @IsNumber()
     balance?: number = 0;
+
+    @IsBoolean()
+    isFavorite: boolean = false;
 }

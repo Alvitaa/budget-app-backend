@@ -1,15 +1,18 @@
-import { IsNumber, IsString, IsUUID } from "class-validator";
+import { IsBoolean, IsNumber, IsString, IsUUID } from "class-validator";
 
 export class ResponseAccountDTO {
     @IsUUID()
-    id: string;
+    id!: string;
 
     @IsString()
-    name: string;
+    name!: string;
 
     @IsNumber()
-    balance: number;
+    balance!: number;
+
+    @IsBoolean()
+    isFavorite!: boolean;
 
     @IsUUID()
-    userId: string;
+    userId!: string;
 }

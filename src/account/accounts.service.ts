@@ -20,7 +20,7 @@ export class AccountService {
     ): Promise<ResponseAccountDTO> {
         try {
             return this.prisma.$transaction(async (tx) => {
-                const account = await this.prisma.account.create({
+                const account = await tx.account.create({
                     data: {
                         ...dto,
                         user: {
@@ -31,11 +31,12 @@ export class AccountService {
                         id: true,
                         name: true,
                         balance: true,
+                        isFavorite: true,
                         userId: true,
                     },
                 });
 
-                this.favoriteAccount(userId, account.id, tx)
+                if (dto.isFavorite) this.toggleFavoriteAccount(userId, account.id, tx);
 
                 return {
                     ...account,
@@ -64,6 +65,7 @@ export class AccountService {
                 id: true,
                 name: true,
                 balance: true,
+                isFavorite: true,
                 userId: true,
             },
         });
@@ -74,30 +76,47 @@ export class AccountService {
         }));
     }
 
-    async favoriteAccount(userId: string, accountId: string, tx?: Prisma.TransactionClient) {
-        const client = tx ?? this.prisma;
-        await client.$transaction([
-            client.account.updateMany({
+    async toggleFavoriteAccount(userId: string, accountId: string, tx: Prisma.TransactionClient, isFavorite: boolean = true) {
+        if (isFavorite) {
+            await tx.account.update({
                 where: {
+                    id: accountId,
+                    userId
+                },
+                data: {
+                    isFavorite: false,
+                },
+            })
+            return;
+        }
+
+        await tx.account.updateMany({
+            where: {
                 userId,
                 isFavorite: true,
-                },
-                data: {
+            },
+            data: {
                 isFavorite: false,
-                },
-            }),
+            },
+        });
 
-            client.account.update({
-                where: {
+        await tx.account.update({
+            where: {
                 id: accountId,
-                },
-                data: {
+                userId,
+            },
+            data: {
                 isFavorite: true,
-                },
-            }),
-        ]);
+            },
+        });
+    }
 
-        return true
+    async handleFavoriteAccount(userId: string, accountId: string) {
+        await this.prisma.$transaction(async (tx) => {
+            const account = await this.getAccountById(userId, accountId, tx);
+
+            await this.toggleFavoriteAccount(userId, account.id, tx, account.isFavorite);
+        })
     }
 
     async getAccountById(
@@ -116,6 +135,7 @@ export class AccountService {
                 id: true,
                 name: true,
                 balance: true,
+                isFavorite: true,
                 userId: true,
             },
         });
@@ -139,25 +159,30 @@ export class AccountService {
             throw new ForbiddenException("Can't update other user's account");
         }
 
-        const updatedAccount = await this.prisma.account.update({
-            where: {
-                id: accountId,
-            },
-            data: {
-                ...dto,
-            },
-            select: {
-                id: true,
-                name: true,
-                balance: true,
-                userId: true,
-            },
-        });
+        return this.prisma.$transaction(async (tx) => {
+            const updatedAccount = await tx.account.update({
+                where: {
+                    id: accountId,
+                },
+                data: {
+                    ...dto,
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    balance: true,
+                    isFavorite: true,
+                    userId: true,
+                },
+            });
 
-        return {
-            ...updatedAccount,
-            balance: Number(updatedAccount.balance)
-        };
+            if (dto.isFavorite) this.toggleFavoriteAccount(userId, accountId, tx, dto.isFavorite);
+
+            return {
+                ...updatedAccount,
+                balance: Number(updatedAccount.balance)
+            };
+        })
     }
 
     async incrementAccountBalance(
