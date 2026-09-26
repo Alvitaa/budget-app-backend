@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
-import { PrismaService } from "src/prisma/prisma.service";
-import { AuthUserDTO } from "src/auth/DTOs/authUser.dto";
+import { PrismaService } from "../prisma/prisma.service";
+import { AuthUserDTO } from "../auth/DTOs/authUser.dto";
 import { ResponseUserDTO } from "./DTOs/responseUser.dto";
 import { UpdateUserDTO } from "./DTOs/updateUser.dto";
 import { CreateUserDTO } from "./DTOs/createUser.dto";

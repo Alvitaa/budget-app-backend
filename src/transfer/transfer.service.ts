@@ -5,9 +5,9 @@ import {
     NotFoundException,
 } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
-import { AccountService } from "src/account/accounts.service";
-import { PrismaService } from "src/prisma/prisma.service";
-import { TransactionService } from "src/transaction/transaction.service";
+import { AccountService } from "../account/accounts.service";
+import { PrismaService } from "../prisma/prisma.service";
+import { TransactionService } from "../transaction/transaction.service";
 import { CreateTransferDTO } from "./DTOs/createTransfer.dto";
 import { ResponseTransferDTO } from "./DTOs/responseTransfer.dto";
 import { UpdateTransferDTO } from "./DTOs/updateTransfer.dto";

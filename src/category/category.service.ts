@@ -5,7 +5,7 @@ import {
     NotFoundException,
 } from "@nestjs/common";
 import { Prisma, TransactionType } from "@prisma/client";
-import { PrismaService } from "src/prisma/prisma.service";
+import { PrismaService } from "../prisma/prisma.service";
 import { CategoryDTO } from "./DTOs/category.dto";
 import { UpdateCategoryDTO } from "./DTOs/updateCategory.dto";
 import { ResponseCategoryDTO } from "./DTOs/responseCategory.dto";

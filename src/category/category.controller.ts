@@ -11,7 +11,7 @@ import {
     Req,
     UseGuards,
 } from "@nestjs/common";
-import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { CategoryService } from "./category.service";
 import { CategoryDTO } from "./DTOs/category.dto";
 import { UpdateCategoryDTO } from "./DTOs/updateCategory.dto";

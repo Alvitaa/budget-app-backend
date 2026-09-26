@@ -16,7 +16,7 @@ import { UserService } from "./user.service";
 import type { User } from "@prisma/client";
 import { ResponseUserDTO } from "./DTOs/responseUser.dto";
 import { UpdateUserDTO } from "./DTOs/updateUser.dto";
-import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
 @Controller("users")
 export class UserController {

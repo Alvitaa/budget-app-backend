@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { TransactionType } from "@prisma/client";
-import { getDateRange } from "src/common/utils/dateRange";
-import { PrismaService } from "src/prisma/prisma.service";
+import { getDateRange } from "../common/utils/dateRange";
+import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class AnalyticsService {

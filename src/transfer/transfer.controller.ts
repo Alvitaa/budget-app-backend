@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { TransferService } from "./transfer.service";
 import { CreateTransferDTO } from "./DTOs/createTransfer.dto";
-import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { UpdateTransferDTO } from "./DTOs/updateTransfer.dto";
 import { GetTransfersDTO } from "./DTOs/getTransfers.dto";
 

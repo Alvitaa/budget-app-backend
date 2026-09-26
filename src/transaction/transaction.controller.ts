@@ -11,7 +11,7 @@ import {
     Req,
     UseGuards,
 } from "@nestjs/common";
-import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { TransactionService } from "./transaction.service";
 import { CreateTransactionDTO } from "./DTOs/createTransaction.dto";
 import { GetTransactionsDTO } from "./DTOs/getTransactions.dto";

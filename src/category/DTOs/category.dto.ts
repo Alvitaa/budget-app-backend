@@ -3,8 +3,8 @@ import { IsEnum, IsString } from "class-validator";
 
 export class CategoryDTO {
     @IsString()
-    name: string;
+    name!: string;
 
     @IsEnum(TransactionType)
-    type: TransactionType;
+    type!: TransactionType;
 }

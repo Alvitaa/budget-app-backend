@@ -3,14 +3,14 @@ import { IsEnum, IsString, IsUUID } from "class-validator";
 
 export class ResponseCategoryDTO {
     @IsUUID()
-    id: string;
+    id!: string;
 
     @IsString()
-    name: string;
+    name!: string;
 
     @IsEnum(TransactionType)
-    type: TransactionType;
+    type!: TransactionType;
 
     @IsUUID()
-    userId: string;
+    userId!: string;
 }

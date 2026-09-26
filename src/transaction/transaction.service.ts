@@ -4,15 +4,15 @@ import {
     Injectable,
     NotFoundException,
 } from "@nestjs/common";
-import { PrismaService } from "src/prisma/prisma.service";
+import { PrismaService } from "../prisma/prisma.service";
 import { CreateTransactionDTO } from "./DTOs/createTransaction.dto";
-import { CategoryService } from "src/category/category.service";
-import { AccountService } from "src/account/accounts.service";
+import { CategoryService } from "../category/category.service";
+import { AccountService } from "../account/accounts.service";
 import { UpdateTransactionDTO } from "./DTOs/updateTransaction.dto";
 import { GetTransactionsDTO } from "./DTOs/getTransactions.dto";
 import { Prisma, TransactionType } from "@prisma/client";
 import { ResponseTransactionDTO } from "./DTOs/responseTransaction.dto";
-import { getDateRange } from "src/common/utils/dateRange";
+import { getDateRange } from "../common/utils/dateRange";
 import { Decimal } from "@prisma/client/runtime/client";
 
 @Injectable()

@@ -1,9 +1,9 @@
 import { Module } from "@nestjs/common";
 import { TransferController } from "./transfer.controller";
 import { TransferService } from "./transfer.service";
-import { PrismaModule } from "src/prisma/prisma.module";
-import { TransactionModule } from "src/transaction/transaction.module";
-import { AccountModule } from "src/account/account.module";
+import { PrismaModule } from "../prisma/prisma.module";
+import { TransactionModule } from "../transaction/transaction.module";
+import { AccountModule } from "../account/account.module";
 
 @Module({
     controllers: [TransferController],

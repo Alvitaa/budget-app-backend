@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { databaseConstants } from 'src/constants';
+import { databaseConstants } from '../constants';
 
 @Injectable()
 export class PrismaService extends PrismaClient {

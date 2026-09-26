@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
-import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { AccountService } from "./accounts.service";
 import { CreateAccountDTO } from "./DTOs/createAccount.dto";
 import { UpdateAccountDTO } from "./DTOs/updateAccount.dto";
