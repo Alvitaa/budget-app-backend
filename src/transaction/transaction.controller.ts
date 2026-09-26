@@ -8,6 +8,7 @@ import {
     Patch,
     Post,
     Query,
+    QueryMethod,
     Req,
     UseGuards,
 } from "@nestjs/common";
@@ -48,6 +49,20 @@ export class TransactionController {
             userId,
             transactionId,
         );
+    }
+
+    @QueryMethod()
+    async getFilteredTransactions(@Req() req, @Body() body: GetTransactionsDTO) {
+        console.log("Recieved endpoint")
+        const userId = req.user.id;
+        // Todo: Use day for filtering
+        const { year, month, page, pageSize } = body;
+
+        if (!year) {
+            return this.transactionService.getTransactions(userId, pageSize, (page - 1) * pageSize);
+        }
+
+        return this.transactionService.getTransactionsByDate(userId, year, month, (page - 1) * pageSize);
     }
 
     @Patch(":id")
