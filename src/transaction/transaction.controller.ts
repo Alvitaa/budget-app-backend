@@ -31,13 +31,14 @@ export class TransactionController {
     @Get()
     async getTransactions(@Req() req, @Query() query: GetTransactionsDTO) {
         const userId = req.user.id;
-        const { year, month, take, skip } = query;
+        // Todo: Use day for filtering
+        const { year, month, page, pageSize } = query;
 
         if (!year) {
-            return this.transactionService.getTransactions(userId, take, skip)
+            return this.transactionService.getTransactions(userId, pageSize, (page - 1) * pageSize);
         }
 
-        return this.transactionService.getTransactionsByDate(userId, year, month, take, skip);
+        return this.transactionService.getTransactionsByDate(userId, year, month, (page - 1) * pageSize);
     }
 
     @Get(":id")
