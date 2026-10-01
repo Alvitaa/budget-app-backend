@@ -23,6 +23,28 @@ export class TransactionService {
         private accountService: AccountService,
     ) {}
 
+    private transactionSelect = {
+        id: true,
+        title: true,
+        description: true,
+        amount: true,
+        type: true,
+        date: true,
+        userId: true,
+        category: {
+            select: {
+                id: true,
+                name: true,
+            },
+        },
+        account: {
+            select: {
+                id: true,
+                name: true,
+            },
+        },
+    } satisfies Prisma.TransactionSelect;
+
     getDelta(type: TransactionType, amount: number): number {
         switch (type) {
             case "INCOME":
@@ -78,27 +100,7 @@ export class TransactionService {
                 date: new Date(`${dto.date}T12:00:00.000Z`),
                 userId,
             },
-            select: {
-                id: true,
-                title: true,
-                description: true,
-                amount: true,
-                type: true,
-                date: true,
-                userId: true,
-                category: {
-                    select: {
-                        id: true,
-                        name: true,
-                    },
-                },
-                account: {
-                    select: {
-                        id: true,
-                        name: true,
-                    },
-                },
-            },
+            select: this.transactionSelect
         });
 
         return {
@@ -107,35 +109,52 @@ export class TransactionService {
         }
     }
 
-    async getTransactions(userId: string, take: number, skip: number) {
-        const where = {
-                userId,
+    async getTransactions(userId: string, dto: GetTransactionsDTO) {
+        const {
+            page = 1,
+            pageSize = 50,
+            search,
+            type,
+            categoryId,
+            accountId,
+            // TODO: more filters
+            // dateFrom, //use year/month instead
+            // dateTo,
+            // minAmount,
+            // maxAmount,
+        } = dto;
+
+        const where: Prisma.TransactionWhereInput = {
+            userId,
+        };
+
+        if (search) {
+            where.OR = [
+                {
+                    title: {
+                        contains: search,
+                        mode: "insensitive",
+                    },
+                },
+                {
+                    description: {
+                        contains: search,
+                        mode: "insensitive",
+                    },
+                },
+            ];
         }
+
+        if (type) where.type = type;
+        if (categoryId) where.categoryId = categoryId;
+        if (accountId) where.accountId = accountId;
+
+        const skip = (page - 1) * pageSize;
 
         const [transactions, total] = await Promise.all([
             this.prisma.transaction.findMany({
                 where,
-                select: {
-                    id: true,
-                    title: true,
-                    description: true,
-                    amount: true,
-                    type: true,
-                    date: true,
-                    userId: true,
-                    category: {
-                        select: {
-                            id: true,
-                            name: true,
-                        },
-                    },
-                    account: {
-                        select: {
-                            id: true,
-                            name: true,
-                        },
-                    },
-                },
+                select: this.transactionSelect,
                 orderBy: [
                     {
                         date: "desc",
@@ -144,7 +163,7 @@ export class TransactionService {
                         createdAt: "desc"
                     }
                 ],
-                take: take,
+                take: pageSize,
                 skip: skip,
             }),
             this.prisma.transaction.count({
@@ -163,44 +182,59 @@ export class TransactionService {
         }
     }
 
-    async getTransactionsByDate(
-        userId: string,
-        year: number,
-        month?: number,
-        take: number = 20,
-        skip: number = 0,
-    ) {
-        const { start, end } = getDateRange(year, month);
+    async getTransactionsByDate(userId: string, dto: GetTransactionsDTO) {
+        const {
+            page = 1,
+            pageSize = 50,
+            search,
+            type,
+            categoryId,
+            accountId,
+            year,
+            month,
+            // TODO: more filters
+            // dateFrom, //use year/month instead
+            // dateTo,
+            // minAmount,
+            // maxAmount,
+        } = dto;
+
+        const { start, end } = getDateRange(year!, month);
+
+        const where: Prisma.TransactionWhereInput = {
+            userId,
+            date: {
+                gte: start,
+                lt: end,
+            },
+        };
+
+        if (search) {
+            where.OR = [
+                {
+                    title: {
+                        contains: search,
+                        mode: "insensitive",
+                    },
+                },
+                {
+                    description: {
+                        contains: search,
+                        mode: "insensitive",
+                    },
+                },
+            ];
+        }
+
+        if (type) where.type = type;
+        if (categoryId) where.categoryId = categoryId;
+        if (accountId) where.accountId = accountId;
+
+        const skip = (page - 1) * pageSize;
 
         const transactions = await this.prisma.transaction.findMany({
-            where: {
-                userId,
-                date: {
-                    gte: start,
-                    lt: end,
-                },
-            },
-            select: {
-                id: true,
-                title: true,
-                description: true,
-                amount: true,
-                type: true,
-                date: true,
-                userId: true,
-                category: {
-                    select: {
-                        id: true,
-                        name: true,
-                    },
-                },
-                account: {
-                    select: {
-                        id: true,
-                        name: true,
-                    },
-                },
-            },
+            where,
+            select: this.transactionSelect,
             orderBy: [
                 {
                     date: "desc",
@@ -209,7 +243,7 @@ export class TransactionService {
                     createdAt: "desc"
                 }
             ],
-            take: take,
+            take: pageSize,
             skip: skip,
         });
 
@@ -231,27 +265,7 @@ export class TransactionService {
                 id: transactionId,
                 userId,
             },
-            select: {
-                id: true,
-                title: true,
-                description: true,
-                amount: true,
-                type: true,
-                date: true,
-                userId: true,
-                category: {
-                    select: {
-                        id: true,
-                        name: true,
-                    },
-                },
-                account: {
-                    select: {
-                        id: true,
-                        name: true,
-                    },
-                },
-            },
+            select: this.transactionSelect
         });
 
         if (!transaction) throw new NotFoundException("Transaction not found");
@@ -324,27 +338,7 @@ export class TransactionService {
                     categoryId,
                     accountId,
                 },
-                select: {
-                    id: true,
-                    title: true,
-                    description: true,
-                    amount: true,
-                    type: true,
-                    date: true,
-                    userId: true,
-                    category: {
-                        select: {
-                            id: true,
-                            name: true,
-                        },
-                    },
-                    account: {
-                        select: {
-                            id: true,
-                            name: true,
-                        },
-                    },
-                },
+                select: this.transactionSelect
             });
 
             return {

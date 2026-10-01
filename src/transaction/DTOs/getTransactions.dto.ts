@@ -9,11 +9,11 @@ export class GetTransactionsDTO {
 
     @IsOptional()
     @IsUUID()
-    categoryId?: number;
+    categoryId?: string;
 
     @IsOptional()
     @IsUUID()
-    accountId?: number;
+    accountId?: string;
 
     @IsOptional()
     @IsString()
